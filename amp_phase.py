@@ -3,6 +3,14 @@ import numpy as np
 
 from constants import *
 
+
+#These drag modes describe different options for adjusting the
+# amplitude and phase
+DM_NONE = 0
+DM_FREE = 1
+DM_AMP_ONLY = 2
+DM_PHASE_ONLY = 3
+
 class AmpPhaseSelectorView(object):
 
     def __init__(self, axes, params, fig):
@@ -10,7 +18,7 @@ class AmpPhaseSelectorView(object):
         self.params = params
         self.fig = fig
         self.callback = None
-        self.dragging = False
+        self.dragging = DM_NONE
 
         self.axes.set_title("Sinusoid Amplitude/Phase")
 
@@ -47,7 +55,12 @@ class AmpPhaseSelectorView(object):
         if(event.button != 1):
             return
 
-        self.dragging = True
+        if(event.key == 'control'):
+            self.dragging = DM_AMP_ONLY
+        elif(event.key == 'shift'):
+            self.dragging = DM_PHASE_ONLY
+        else:
+            self.dragging = DM_FREE
 
         self.onmotion(event)
 
@@ -60,22 +73,25 @@ class AmpPhaseSelectorView(object):
             return
 
         self.onmotion(event)
-        self.dragging = False
+        self.dragging = DM_NONE
 
     def onmotion(self, event):
         ax = event.inaxes
 
         if(ax != self.axes):
             return
-        if(not self.dragging):
+        if(self.dragging == DM_NONE):
             return
 
         x = event.xdata
         y = event.ydata
 
         cplx = x + 1j*y
-        self.params.amplitude = np.abs(cplx)
-        self.params.phase = np.angle(cplx)
+
+        if(self.dragging in [DM_AMP_ONLY, DM_FREE]):
+            self.params.amplitude = np.abs(cplx)
+        if(self.dragging in [DM_PHASE_ONLY, DM_FREE]):
+            self.params.phase = np.angle(cplx)
 
         self.Update()
 
