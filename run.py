@@ -9,6 +9,7 @@ from constants import *
 
 from time_domain import TimeDomainView
 from amp_phase import AmpPhaseSelectorView
+from freq_domain3d import FreqDomain3DView
 
 if __name__ != "__main__":
     # execute only if run as a script
@@ -36,21 +37,21 @@ class Sinusoid(object):
 params = Sinusoid()
 
 
-fig = plt.figure()
-
-ax_ampphase = plt.axes([0.05, 0.15, 0.4, 0.8])
-view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, fig)
-
-
-ax_freqslider = plt.axes([0.05, 0.02, 0.35, 0.07], facecolor='lightgoldenrodyellow')
+fig_selection = plt.figure()
+ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
+view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, fig_selection)
+ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyellow')
 sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
 
 
-ax_timedomain = plt.axes([0.5, 0.05, 0.45, 0.9])
+fig_timedomain = plt.figure()
+ax_timedomain = plt.axes()
 view_timedomain = TimeDomainView(ax_timedomain)
 
+fig_freqdomain3d = plt.figure()
+ax_freqdomain3d = plt.subplot(111, projection='3d')
+view_freqdomain3d = FreqDomain3DView(ax_freqdomain3d)
 
-ax_freqdomain3d = plt.axes([0.05, 0.05, 0.4, 0.4], projection='3d')
 
 # fig.canvas.draw_idle()
 
@@ -109,13 +110,18 @@ def freqSliderUpdate(val):
     UpdatePlots()
 
 def UpdatePlots():
-    view_timedomain.Update(params)
-    fig.canvas.draw_idle()
+    _, windowed = view_timedomain.Update(params)
+
+    view_freqdomain3d.Update(windowed)
+
+    fig_selection.canvas.draw_idle()
+    fig_timedomain.canvas.draw_idle()
+    fig_freqdomain3d.canvas.draw_idle()
 
 sfreq.on_changed(freqSliderUpdate)
 view_ampphase.callback = UpdatePlots
 
-view_timedomain.Update(params)
+UpdatePlots()
 
 plt.show()
 
