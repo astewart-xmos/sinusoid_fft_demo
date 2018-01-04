@@ -37,25 +37,22 @@ class Sinusoid(object):
 
 params = Sinusoid()
 
+fig = plt.figure()
+fig.canvas.set_window_title('Sinusoid FFT Demo')
 
-fig_selection = plt.figure()
-ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
-view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, fig_selection)
-ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyellow')
+ax_timedomain = fig.add_subplot(2, 2, 2)
+ax_freqdomain2d  = fig.add_subplot(2, 2, 3)
+ax_freqdomain3d = fig.add_subplot(2, 2, 4, projection='3d')
+
+ax_ampphase = plt.axes(  [0.1, 0.65, 0.3, 0.3])
+ax_freqslider = plt.axes([0.1, 0.55, 0.3, 0.035], facecolor='lightgoldenrodyellow')
+
+
+view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, fig)
 sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
 
-
-fig_timedomain = plt.figure()
-ax_timedomain = plt.axes()
 view_timedomain = TimeDomainView(ax_timedomain)
-
-fig_freqdomain3d = plt.figure()
-ax_freqdomain3d = plt.subplot(111, projection='3d')
 view_freqdomain3d = FreqDomain3DView(ax_freqdomain3d)
-
-
-fig_freqdomain2d = plt.figure()
-ax_freqdomain2d = plt.axes()
 view_freqdomain2d = FreqDomainMagView(ax_freqdomain2d)
 
 
@@ -76,10 +73,7 @@ def UpdatePlots():
     view_freqdomain3d.Update(F_sig_hires, F_sig)
     view_freqdomain2d.Update(F_sig_hires, F_sig)
 
-    fig_selection.canvas.draw_idle()
-    fig_timedomain.canvas.draw_idle()
-    fig_freqdomain3d.canvas.draw_idle()
-    fig_freqdomain2d.canvas.draw_idle()
+    fig.canvas.draw_idle()
 
 sfreq.on_changed(freqSliderUpdate)
 view_ampphase.callback = UpdatePlots
