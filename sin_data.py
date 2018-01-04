@@ -3,6 +3,21 @@ import numpy as np
 
 from constants import *
 
+class Obj(object):
+    def __init__(self):
+        pass
+
+class SpectrumInfo(object):
+
+    def __init__(self, sinusoid, fft_n):
+
+        self.complex = np.fft.fftshift(np.fft.fft(sinusoid, fft_n) / FFT_N)
+
+        self.real = np.real(self.complex)
+        self.imag = np.imag(self.complex)
+        self.mag =  np.abs(self.complex)
+        self.phase = np.angle(self.complex)
+
 
 class SinData(object):
     """
@@ -19,27 +34,28 @@ class SinData(object):
 
         self.window = np.hanning(WINDOW_SIZE+1)[:WINDOW_SIZE]
         self.sample_indices = np.arange(0, WINDOW_SIZE)
+
         self.sinusoid = params.amplitude * np.cos(2*np.pi * params.frequency 
-                                    * self.sample_indices / float(WINDOW_SIZE) + params.phase)
+                         * self.sample_indices / float(WINDOW_SIZE) + params.phase)
 
-        self.sinusoid_windowed = self.window * self.sinusoid
+        self.sinusoid_d = np.zeros(WINDOW_SIZE)
+        self.sinusoid_d[1:] = self.sinusoid[:WINDOW_SIZE-1]
 
-        self.bins_lo = np.arange(-FFT_N/2, FFT_N/2) / float(1)
-        self.bins_hi = np.arange(-(FFT_N*UPSAMPLE)/2, (FFT_N*UPSAMPLE)/2) / float(UPSAMPLE)
+        self.sinusoid_w = self.window * self.sinusoid
+        self.sinusoid_dw = self.window * self.sinusoid_d
 
-        self.spectrum_lo = np.fft.fft(self.sinusoid_windowed, FFT_N) / FFT_N
-        self.spectrum_hi = np.fft.fft(self.sinusoid_windowed, FFT_N*UPSAMPLE) / FFT_N
 
-        self.spectrum_lo = np.fft.fftshift(self.spectrum_lo)
-        self.spectrum_hi = np.fft.fftshift(self.spectrum_hi)
+        self.lo = Obj()
+        self.lo.bins = np.arange(-FFT_N/2, FFT_N/2) / float(1)
 
-        self.spectrum_real_lo = np.real(self.spectrum_lo)
-        self.spectrum_imag_lo = np.imag(self.spectrum_lo)
+        self.hi = Obj()
+        self.hi.bins = np.arange(-(FFT_N*UPSAMPLE)/2, (FFT_N*UPSAMPLE)/2) / float(UPSAMPLE)
 
-        self.spectrum_real_hi = np.real(self.spectrum_hi)
-        self.spectrum_imag_hi = np.imag(self.spectrum_hi)
+        self.lo.spectrum = SpectrumInfo(self.sinusoid_w, FFT_N)
+        self.lo.spectrum_d = SpectrumInfo(self.sinusoid_dw, FFT_N)
 
-        self.spectrum_mag_lo = np.abs(self.spectrum_lo)
-        self.spectrum_mag_hi = np.abs(self.spectrum_hi)
+        self.hi.spectrum = SpectrumInfo(self.sinusoid_w, FFT_N*UPSAMPLE)
+        self.hi.spectrum_d = SpectrumInfo(self.sinusoid_dw, FFT_N*UPSAMPLE)
+
 
 

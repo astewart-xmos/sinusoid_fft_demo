@@ -29,11 +29,10 @@ class FreqDomain3DView(object):
 
     def Update(self, data):
 
-
-        self.curve.set_data(data.bins_hi, data.spectrum_real_hi)
-        self.curve.set_3d_properties(data.spectrum_imag_hi)
+        self.curve.set_data(data.hi.bins, data.hi.spectrum.real)
+        self.curve.set_3d_properties(data.hi.spectrum.imag)
 
         self.scatter.remove()
         self.scatter = self.axes.scatter(xs=[],ys=[],zs=[], color='red', label='Lo-res Transform')
-        self.scatter.set_offsets(zip(*[data.bins_lo, data.spectrum_real_lo]))
-        self.scatter.set_3d_properties(data.spectrum_imag_lo,'z')
+        self.scatter.set_offsets(zip(*[data.lo.bins, data.lo.spectrum.real]))
+        self.scatter.set_3d_properties(data.lo.spectrum.imag,'z')

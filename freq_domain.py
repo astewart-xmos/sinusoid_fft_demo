@@ -25,6 +25,6 @@ class FreqDomainMagView(object):
 
     def Update(self, data):
 
-        self.curve.set_data(data.bins_hi, data.spectrum_mag_hi)
+        self.curve.set_data(data.hi.bins, data.hi.spectrum.mag)
 
-        self.scatter.set_offsets(zip(*[data.bins_lo, data.spectrum_mag_lo]))
+        self.scatter.set_offsets(zip(*[data.lo.bins, data.lo.spectrum.mag]))

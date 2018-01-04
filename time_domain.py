@@ -23,4 +23,4 @@ class TimeDomainView(object):
 
     def Update(self, data):
         self.curve.set_data(data.sample_indices, data.sinusoid)
-        self.curve_windowed.set_data(data.sample_indices, data.sinusoid_windowed)
+        self.curve_windowed.set_data(data.sample_indices, data.sinusoid_w)
