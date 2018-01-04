@@ -10,6 +10,7 @@ class AmpPhaseSelectorView(object):
         self.params = params
         self.fig = fig
         self.callback = None
+        self.dragging = False
 
         self.axes.set_title("Sinusoid Amplitude/Phase")
 
@@ -26,7 +27,9 @@ class AmpPhaseSelectorView(object):
 
         self.Update()
 
-        cid = fig.canvas.mpl_connect('button_press_event', self.onclick)
+        cid = fig.canvas.mpl_connect('button_press_event', self.onbuttondown)
+        cid = fig.canvas.mpl_connect('motion_notify_event', self.onmotion)
+        cid = fig.canvas.mpl_connect('button_release_event', self.onbuttonup)
 
     def Update(self):
 
@@ -35,10 +38,36 @@ class AmpPhaseSelectorView(object):
         self.scatter.set_offsets([(cplx.real, cplx.imag)])
         self.curve.set_data([0, cplx.real], [0, cplx.imag])
 
-    def onclick(self, event):
+    def onbuttondown(self, event):
         ax = event.inaxes
 
         if(ax != self.axes):
+            return
+
+        if(event.button != 1):
+            return
+
+        self.dragging = True
+
+        self.onmotion(event)
+
+    def onbuttonup(self, event):
+        ax = event.inaxes
+
+        if(ax != self.axes):
+            return
+        if(event.button != 1):
+            return
+
+        self.onmotion(event)
+        self.dragging = False
+
+    def onmotion(self, event):
+        ax = event.inaxes
+
+        if(ax != self.axes):
+            return
+        if(not self.dragging):
             return
 
         x = event.xdata
