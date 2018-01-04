@@ -26,6 +26,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-f','--freq', nargs='+', 
                             help='Supply frequencies which will be cycled via the arrow keys.', required=False)
 
+parser.add_argument('-q','--no-time', action='store_true', 
+                            help="Don't open a time-domain view of the sinusoid.")
+parser.add_argument('-w','--no-mag', action='store_true', 
+                            help="Don't open a frequency-domain magnitude view of the sinusoid.")
+parser.add_argument('-e','--no-complex', action='store_true', 
+                            help="Don't open a complex frequency-domain view of the sinusoid.")
+
 
 args = parser.parse_args()
 
@@ -67,19 +74,20 @@ ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyell
 sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
 
 
+if(not args.no_time):
+    figures.append(plt.figure())
+    axes.append(plt.axes())
+    update_views.append(TimeDomainView(axes[-1]))
 
-figures.append(plt.figure())
-axes.append(plt.axes())
-update_views.append(TimeDomainView(axes[-1]))
+if(not args.no_complex):
+    figures.append(plt.figure())
+    axes.append(plt.subplot(111, projection='3d'))
+    update_views.append(FreqDomain3DView(axes[-1]))
 
-# figures.append(plt.figure())
-# axes.append(plt.subplot(111, projection='3d'))
-# update_views.append(FreqDomain3DView(axes[-1]))
-
-
-# figures.append(plt.figure())
-# axes.append(plt.axes())
-# update_views.append(FreqDomainMagView(axes[-1]))
+if(not args.no_mag):
+    figures.append(plt.figure())
+    axes.append(plt.axes())
+    update_views.append(FreqDomainMagView(axes[-1]))
 
 
 def freqSliderUpdate(val):
