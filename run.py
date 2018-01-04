@@ -65,6 +65,7 @@ update_views = []
 axes = []
 
 figures.append(plt.figure())
+figures[-1].canvas.set_window_title("Freq/Amp/Phase Controls")
 ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
 view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, figures[-1])
 
@@ -76,16 +77,19 @@ sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
 
 if(not args.no_time):
     figures.append(plt.figure())
+    figures[-1].canvas.set_window_title("Time Domain")
     axes.append(plt.axes())
     update_views.append(TimeDomainView(axes[-1]))
 
 if(not args.no_complex):
     figures.append(plt.figure())
+    figures[-1].canvas.set_window_title("Frequency Domain (Complex)")
     axes.append(plt.subplot(111, projection='3d'))
     update_views.append(FreqDomain3DView(axes[-1]))
 
 if(not args.no_mag):
     figures.append(plt.figure())
+    figures[-1].canvas.set_window_title("Frequency Domain (Magnitude)")
     axes.append(plt.axes())
     update_views.append(FreqDomainMagView(axes[-1]))
 
