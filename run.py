@@ -54,49 +54,67 @@ class Sinusoid(object):
     def time_domain(self):
         return self.amplitude * np.cos(2*np.pi * np.arange(0,1024) / float(WINDOW_SIZE) + self.phase)
 
+scratch = []
+
+def LayoutMultiWindow(args, UpdatePlots):
+    global scratch
+
+    figures = []
+    axes = []
+    update_views = []
+
+    figures.append(plt.figure())
+    figures[-1].canvas.set_window_title("Freq/Amp/Phase Controls")
+    ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
+    view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, figures[-1])
+
+    ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyellow')
+
+
+    sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
+
+
+    if(not args.no_time):
+        figures.append(plt.figure())
+        figures[-1].canvas.set_window_title("Time Domain")
+        axes.append(plt.axes())
+        update_views.append(TimeDomainView(axes[-1]))
+
+    if(not args.no_complex):
+        figures.append(plt.figure())
+        figures[-1].canvas.set_window_title("Frequency Domain (Complex)")
+        axes.append(plt.subplot(111, projection='3d'))
+        update_views.append(FreqDomain3DView(axes[-1]))
+
+    if(not args.no_mag):
+        figures.append(plt.figure())
+        figures[-1].canvas.set_window_title("Frequency Domain (Magnitude)")
+        axes.append(plt.axes())
+        update_views.append(FreqDomainMagView(axes[-1]))
+
+
+    sfreq.on_changed(freqSliderUpdate)
+    figures[0].canvas.mpl_connect('key_press_event', KeyPress)
+
+    view_ampphase.callback = UpdatePlots
+
+    scratch.append(ax_freqslider)
+    scratch.append(ax_ampphase)
+    scratch.append(view_ampphase)
+    return figures, axes, update_views, sfreq
 
 params = Sinusoid()
 if(args.freq is not None):
     params.frequency = args.freq[0]
     params.last_freq_index = 0
 
-figures = []
-update_views = []
-axes = []
 
-figures.append(plt.figure())
-figures[-1].canvas.set_window_title("Freq/Amp/Phase Controls")
-ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
-view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, figures[-1])
-
-ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyellow')
-
-
-sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
-
-
-if(not args.no_time):
-    figures.append(plt.figure())
-    figures[-1].canvas.set_window_title("Time Domain")
-    axes.append(plt.axes())
-    update_views.append(TimeDomainView(axes[-1]))
-
-if(not args.no_complex):
-    figures.append(plt.figure())
-    figures[-1].canvas.set_window_title("Frequency Domain (Complex)")
-    axes.append(plt.subplot(111, projection='3d'))
-    update_views.append(FreqDomain3DView(axes[-1]))
-
-if(not args.no_mag):
-    figures.append(plt.figure())
-    figures[-1].canvas.set_window_title("Frequency Domain (Magnitude)")
-    axes.append(plt.axes())
-    update_views.append(FreqDomainMagView(axes[-1]))
 
 
 def freqSliderUpdate(val):
     params.frequency = val
     UpdatePlots()
+
 def KeyPress(event):
     
     #LEFT and RIGHT rotate through the frequencies that
@@ -128,11 +146,8 @@ def UpdatePlots():
     for fig in figures:
         fig.canvas.draw_idle()
 
+figures, axes, update_views, sfreq = LayoutMultiWindow(args, UpdatePlots)
 
-sfreq.on_changed(freqSliderUpdate)
-figures[0].canvas.mpl_connect('key_press_event', KeyPress)
-
-view_ampphase.callback = UpdatePlots
 
 UpdatePlots()
 

@@ -34,7 +34,6 @@ class AmpPhaseSelectorView(object):
         self.curve, = self.axes.plot([], [], c='green')
 
         self.Update()
-
         cid = fig.canvas.mpl_connect('button_press_event', self.onbuttondown)
         cid = fig.canvas.mpl_connect('motion_notify_event', self.onmotion)
         cid = fig.canvas.mpl_connect('button_release_event', self.onbuttonup)
@@ -77,7 +76,6 @@ class AmpPhaseSelectorView(object):
 
     def onmotion(self, event):
         ax = event.inaxes
-
         if(ax != self.axes):
             return
         if(self.dragging == DM_NONE):
