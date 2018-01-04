@@ -2,20 +2,26 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button, RadioButtons
+from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
 from mpl_toolkits.mplot3d import Axes3D
 
 from constants import *
+
+from sin_data import SinData
 
 from time_domain import TimeDomainView
 from amp_phase import AmpPhaseSelectorView
 from freq_domain3d import FreqDomain3DView
 from freq_domain import FreqDomainMagView
 
+import argparse
+
 if __name__ != "__main__":
     # execute only if run as a script
     import sys
     sys.exit(0)
+
+
 
 
 class Sinusoid(object):
@@ -37,27 +43,28 @@ class Sinusoid(object):
 
 params = Sinusoid()
 
+figures = []
+update_views = []
+axes = []
 
-fig_selection = plt.figure()
+figures.append(plt.figure())
 ax_ampphase = plt.axes([0.2, 0.2, 0.7, 0.7])
-view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, fig_selection)
+view_ampphase = AmpPhaseSelectorView(ax_ampphase, params, figures[-1])
 ax_freqslider = plt.axes([0.15, 0.02, 0.75, 0.07], facecolor='lightgoldenrodyellow')
 sfreq = Slider(ax_freqslider, 'Freq', 0.1, FFT_N/2.0, valinit=params.frequency)
 
+figures.append(plt.figure())
+axes.append(plt.axes())
+update_views.append(TimeDomainView(axes[-1]))
 
-fig_timedomain = plt.figure()
-ax_timedomain = plt.axes()
-view_timedomain = TimeDomainView(ax_timedomain)
-
-fig_freqdomain3d = plt.figure()
-ax_freqdomain3d = plt.subplot(111, projection='3d')
-view_freqdomain3d = FreqDomain3DView(ax_freqdomain3d)
+figures.append(plt.figure())
+axes.append(plt.subplot(111, projection='3d'))
+update_views.append(FreqDomain3DView(axes[-1]))
 
 
-fig_freqdomain2d = plt.figure()
-ax_freqdomain2d = plt.axes()
-view_freqdomain2d = FreqDomainMagView(ax_freqdomain2d)
-
+figures.append(plt.figure())
+axes.append(plt.axes())
+update_views.append(FreqDomainMagView(axes[-1]))
 
 
 def freqSliderUpdate(val):
@@ -65,21 +72,13 @@ def freqSliderUpdate(val):
     UpdatePlots()
 
 def UpdatePlots():
-    _, windowed = view_timedomain.Update(params)
+    data = SinData(params)
 
-    F_sig = np.fft.fft(windowed, FFT_N) / FFT_N
-    F_sig = np.fft.fftshift(F_sig)
+    for view in update_views:
+        view.Update(data)
 
-    F_sig_hires = np.fft.fft(windowed, FFT_N*UPSAMPLE) / FFT_N
-    F_sig_hires = np.fft.fftshift(F_sig_hires)
-
-    view_freqdomain3d.Update(F_sig_hires, F_sig)
-    view_freqdomain2d.Update(F_sig_hires, F_sig)
-
-    fig_selection.canvas.draw_idle()
-    fig_timedomain.canvas.draw_idle()
-    fig_freqdomain3d.canvas.draw_idle()
-    fig_freqdomain2d.canvas.draw_idle()
+    for fig in figures:
+        fig.canvas.draw_idle()
 
 sfreq.on_changed(freqSliderUpdate)
 view_ampphase.callback = UpdatePlots

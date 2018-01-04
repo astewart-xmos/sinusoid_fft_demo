@@ -21,16 +21,6 @@ class TimeDomainView(object):
 
         self.axes.legend()
 
-        self.window = np.hanning(WINDOW_SIZE+1)[:WINDOW_SIZE]
-
-    def Update(self, params):
-
-        t = np.arange(0, WINDOW_SIZE)
-        s = params.amplitude * np.cos(2*np.pi * params.frequency * t / float(WINDOW_SIZE) + params.phase)
-
-        s_windowed = s * self.window
-
-        self.curve.set_data(t, s)
-        self.curve_windowed.set_data(t, s_windowed)
-
-        return s, s_windowed
+    def Update(self, data):
+        self.curve.set_data(data.sample_indices, data.sinusoid)
+        self.curve_windowed.set_data(data.sample_indices, data.sinusoid_windowed)

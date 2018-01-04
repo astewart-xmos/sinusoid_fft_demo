@@ -26,23 +26,14 @@ class FreqDomain3DView(object):
 
         self.axes.legend()
 
-        self.bins = np.arange(-WINDOW_SIZE/2, WINDOW_SIZE/2)
-        self.bins_hires = np.arange(-WINDOW_SIZE*UPSAMPLE/2, WINDOW_SIZE*UPSAMPLE/2) / float(UPSAMPLE)
+
+    def Update(self, data):
 
 
-    def Update(self, F_sig_hires, F_sig):
-
-        real = np.real(F_sig)
-        imag = np.imag(F_sig)
-
-        real_hires = np.real(F_sig_hires)
-        imag_hires = np.imag(F_sig_hires)
-
-
-        self.curve.set_data(self.bins_hires, real_hires)
-        self.curve.set_3d_properties(imag_hires)
+        self.curve.set_data(data.bins_hi, data.spectrum_real_hi)
+        self.curve.set_3d_properties(data.spectrum_imag_hi)
 
         self.scatter.remove()
         self.scatter = self.axes.scatter(xs=[],ys=[],zs=[], color='red', label='Lo-res Transform')
-        self.scatter.set_offsets(zip(*[self.bins, real]))
-        self.scatter.set_3d_properties(imag,'z')
+        self.scatter.set_offsets(zip(*[data.bins_lo, data.spectrum_real_lo]))
+        self.scatter.set_3d_properties(data.spectrum_imag_lo,'z')
